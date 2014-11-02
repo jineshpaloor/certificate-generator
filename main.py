@@ -11,7 +11,6 @@ from pdf_generator import PDFGenerator
 
 
 qt_app = QApplication(sys.argv)
-conn = sqlite3.connect('amc.db')
 
 # Create table - only once
 table_creation_query = """
@@ -22,6 +21,8 @@ table_creation_query = """
      nature_of_work VARCHAR(30),
      routines TEXT,
      parts_replaced VARCHAR(200),
+     defects TEXT,
+     correction TEXT,
      spares_supplied_by VARCHAR(30),
      invoice_details VARCHAR(30),
      requirment_oem VARCHAR(5),
@@ -45,6 +46,8 @@ class CertificateGenerator(QWidget):
         # Initialize the object as a QWidget and
         # set its title and minimum width
         QWidget.__init__(self)
+        self.conn = sqlite3.connect('amc.db')
+        self.conn.row_factory = self.dict_factory
         self.setWindowTitle('AMC Certificate Generator')
         self.setMinimumWidth(500)
 
@@ -56,8 +59,8 @@ class CertificateGenerator(QWidget):
 
         # wcc - auto fill; create a textbox and add it to form layout
         self.wcc = QLineEdit(self)
-        result = conn.execute('select count(id) from certificate')
-        conn_id = result.fetchone()[0]
+        result = self.conn.execute('select count(id) from certificate')
+        conn_id = result.fetchone().get('count(id)')
         self.wcc.setText("FIC/{0}/2014-15".format(conn_id + 1))
         self.form_layout.addRow('WCC:', self.wcc)
 
@@ -108,6 +111,14 @@ class CertificateGenerator(QWidget):
         self.service = QLineEdit(self)
         self.form_layout.addRow('OEM Service Report:', self.service)
 
+        # Defects if any observed
+        self.defects = QTextEdit(self)
+        self.form_layout.addRow('Defects If Any Observed:', self.defects)
+
+        # Corrective action
+        self.correction = QTextEdit(self)
+        self.form_layout.addRow('Corrective Actions:', self.correction)
+
         # Customer Remark
         self.remark = QTextEdit(self)
         self.form_layout.addRow('Customer Remark:', self.remark)
@@ -155,28 +166,38 @@ class CertificateGenerator(QWidget):
         # listen to button click
         self.build_button.clicked.connect(self.clicked_slot)
 
+    def dict_factory(self, cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
     def generate_report(self, wcc):
-        cur = conn.execute(
+        cur = self.conn.cursor()
+        result = cur.execute(
             "select * from certificate where wcc='{0}'".format(wcc))
-        result = cur.fetchone()
-        pdf = PDFGenerator('amc_certificate_{0}.pdf'.format(result[0]))
+        data = result.fetchone()
+        pdf = PDFGenerator('/home/jinesh/Desktop/amc_certificate_{0}.pdf'\
+            .format(data.get('id')))
         pdf.write_main_header()
         row_headers = [
             'WCC', 'DATE', 'Nature of work', 'Routines carried out',
-            'Parts Replaced', 'Spares supplied by',
-            'Invoice details', 'Requirement of OEM', 'OEM service report',
-            'Customer remark'
-        ]
-        data_column = [result[1], result[2], result[3], result[4], result[5],
-            result[6], result[7], result[8], result[9], result[10]]
+            'Parts Replaced', 'Spares supplied by', 'Invoice details',
+            'Requirement of OEM', 'OEM service report', 'Customer remark']
 
-        names = [result[13], result[11]]
-        designations = [result[14], result[12]]
+        data_column = [data.get('wcc'), data.get('document_date'),
+                data.get('nature_of_work'), data.get('routines'),
+                data.get('parts_replaced'), data.get('spares_supplied_by'),
+                data.get('invoice_details'),  data.get('requirment_oem'),
+                data.get('oem_service_report'), data.get('customer_remark')]
+
+        names = [data.get('contractor_name'), data.get('customer_name')]
+        designations = [data.get('contractor_designation'),
+                data.get('customer_designation')]
 
         data = zip(row_headers, data_column)
         pdf.write_body(data, names, designations)
         file_name = pdf.write_pdf()
-        print file_name
         return file_name
 
     @Slot()
@@ -191,6 +212,8 @@ class CertificateGenerator(QWidget):
         invoice_details = self.invoice.text()
         requirment_oem = self.boolean[self.oem.currentIndex()]
         oem_service_report = self.service.text()
+        defects = self.defects.toPlainText()
+        correction = self.correction.toPlainText()
         customer_remark = self.remark.toPlainText()
         customer_name = self.customer_name.text()
         customer_designation = self.customer_desig.text()
@@ -199,21 +222,21 @@ class CertificateGenerator(QWidget):
 
         values_list = [wcc, document_date.toPython(), nature_of_work, routines,
             parts_replaced, spares_supplied_by, invoice_details,
-            requirment_oem, oem_service_report, customer_remark,
-            customer_name, customer_designation, contractor_name,
-            contractor_designation]
+            requirment_oem, oem_service_report, defects, correction,
+            customer_remark, customer_name, customer_designation,
+            contractor_name, contractor_designation]
 
         cleaned_values_list = ["'" + str(v) + "'"  if v else "' '" for v in values_list]
 
         insert_command = """insert into certificate
             (wcc, document_date, nature_of_work, routines, parts_replaced,
             spares_supplied_by, invoice_details, requirment_oem,
-            oem_service_report, customer_remark, customer_name,
+            oem_service_report, defects, correction, customer_remark, customer_name,
             customer_designation, contractor_name, contractor_designation)
             VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10},
-            {11}, {12}, {13})""".format(*cleaned_values_list)
-        cur = conn.execute(insert_command)
-        conn.commit()
+            {11}, {12}, {13}, {14}, {15})""".format(*cleaned_values_list)
+        cur = self.conn.execute(insert_command)
+        self.conn.commit()
         file_name = self.generate_report(wcc)
         return file_name
 
