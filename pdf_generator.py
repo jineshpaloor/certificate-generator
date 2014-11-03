@@ -1,10 +1,9 @@
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.pagesizes import landscape
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Table
 from reportlab.platypus import TableStyle, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_RIGHT, TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.rl_config import defaultPageSize
 
 
@@ -71,16 +70,16 @@ class PDFGenerator(object):
     def write_body(self, data, names, designations):
         rowheights = [
             20, 20, 20,
-            200, 120, 20,
+            160, 80, 80,
             20, 20, 20,
-            20, 100, 20,
-            20, 20, 20,
+            20, 20, 100,
+            20, 20, 20, 20,
         ]
 
         # data = [ [self.make_bold(val) for val in row] for row in row_data]
         # photo table
-        photo_table = self.get_photo_table()
-        data.insert(4, ['Photo attachment', photo_table])
+        # photo_table = self.get_photo_table()
+        # data.insert(4, ['Photo attachment', photo_table])
 
         # 3 column section
         customer_sign = self.three_col_table(['', 'Customer Sign', ''])
@@ -96,10 +95,9 @@ class PDFGenerator(object):
         date_seal = self.three_col_table(['', 'Date / Seal', ''])
         data.insert(14, ['Date / Seal', date_seal])
 
-        body_table = Table(data,
-                splitByRow=True,
-                rowHeights=rowheights,
-                colWidths=(145, 435))
+        body_table = Table(
+            data, splitByRow=True, rowHeights=rowheights,
+            colWidths=(145, 435))
 
         body_table.setStyle(TableStyle([
             ('ALIGN',(0, 0), (-1, -1), 'CENTER'),

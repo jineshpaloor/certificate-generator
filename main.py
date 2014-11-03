@@ -1,11 +1,9 @@
 #-*- coding: utf-8 -*-
 
-import datetime
 import sqlite3
 import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
-from PySide.QtDeclarative import QDeclarativeView
 
 from pdf_generator import PDFGenerator
 
@@ -183,12 +181,14 @@ class CertificateGenerator(QWidget):
         row_headers = [
             'WCC', 'DATE', 'Nature of work', 'Routines carried out',
             'Parts Replaced', 'Spares supplied by', 'Invoice details',
-            'Requirement of OEM', 'OEM service report', 'Customer remark']
+            'Requirement of OEM', 'OEM service report',
+            'Defect If Any Observed', 'Corrective Action', 'Customer remark']
 
         data_column = [data.get('wcc'), data.get('document_date'),
                 data.get('nature_of_work'), data.get('routines'),
                 data.get('parts_replaced'), data.get('spares_supplied_by'),
                 data.get('invoice_details'),  data.get('requirment_oem'),
+                data.get('defects'),  data.get('correction'),
                 data.get('oem_service_report'), data.get('customer_remark')]
 
         names = [data.get('contractor_name'), data.get('customer_name')]
@@ -235,7 +235,7 @@ class CertificateGenerator(QWidget):
             customer_designation, contractor_name, contractor_designation)
             VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10},
             {11}, {12}, {13}, {14}, {15})""".format(*cleaned_values_list)
-        cur = self.conn.execute(insert_command)
+        self.conn.execute(insert_command)
         self.conn.commit()
         file_name = self.generate_report(wcc)
         return file_name
