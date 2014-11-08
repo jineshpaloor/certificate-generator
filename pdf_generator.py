@@ -70,9 +70,9 @@ class PDFGenerator(object):
     def write_body(self, data, names, designations):
         rowheights = [
             20, 20, 20,
-            160, 80, 80,
+            160, 20, 20,
             20, 20, 20,
-            20, 20, 100,
+            80, 80, 20,
             20, 20, 20, 20,
         ]
 

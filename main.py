@@ -48,6 +48,7 @@ class CertificateGenerator(QWidget):
         self.conn.row_factory = self.dict_factory
         self.setWindowTitle('AMC Certificate Generator')
         self.setMinimumWidth(500)
+        self.setMaximumHeight(500)
 
         # Create the QVBoxLayout that lays out the whole form
         self.layout = QVBoxLayout()
@@ -175,7 +176,7 @@ class CertificateGenerator(QWidget):
         result = cur.execute(
             "select * from certificate where wcc='{0}'".format(wcc))
         data = result.fetchone()
-        pdf = PDFGenerator('/home/jinesh/Desktop/amc_certificate_{0}.pdf'\
+        pdf = PDFGenerator('amc_certificate_{0}.pdf'\
             .format(data.get('id')))
         pdf.write_main_header()
         row_headers = [
@@ -246,6 +247,9 @@ class CertificateGenerator(QWidget):
         # Run the qt application
         qt_app.exec_()
 
-# Create an instance of the application window and run it
-app = CertificateGenerator()
-app.run()
+def start_app():
+    # Create an instance of the application window and run it
+    app = CertificateGenerator()
+    app.run()
+
+start_app()
