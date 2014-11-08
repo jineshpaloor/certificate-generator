@@ -48,25 +48,29 @@ class CertificateGenerator(QWidget):
         self.conn.row_factory = self.dict_factory
         self.setWindowTitle('AMC Certificate Generator')
         self.setMinimumWidth(500)
-        self.setMaximumHeight(500)
+        #self.setMaximumHeight(500)
 
         # Create the QVBoxLayout that lays out the whole form
-        self.layout = QVBoxLayout()
+        self.layoutl = QVBoxLayout()
+        self.layoutr = QVBoxLayout()
+        self.layout = QHBoxLayout()
 
         # Create the form layout that manages the labeled controls
         self.form_layout = QFormLayout()
+        self.form_layoutl = QFormLayout()
+        self.form_layoutr = QFormLayout()
 
         # wcc - auto fill; create a textbox and add it to form layout
         self.wcc = QLineEdit(self)
         result = self.conn.execute('select count(id) from certificate')
         conn_id = result.fetchone().get('count(id)')
         self.wcc.setText("FIC/{0}/2014-15".format(conn_id + 1))
-        self.form_layout.addRow('WCC:', self.wcc)
+        self.form_layoutl.addRow('WCC:', self.wcc)
 
         # DATE: system date / user chosen date;
         # create a textbox and add it to form layout
         self.input_date = QCalendarWidget(self)
-        self.form_layout.addRow('DATE:', self.input_date)
+        self.form_layoutl.addRow('DATE:', self.input_date)
 
         # The salutations that we want to make available
         self.work_type = ['Daily',
@@ -79,67 +83,70 @@ class CertificateGenerator(QWidget):
         # And Add it to the form layout with a label
         self.nature_of_work = QComboBox(self)
         self.nature_of_work.addItems(self.work_type)
-        self.form_layout.addRow('Nature of work:', self.nature_of_work)
+        self.form_layoutl.addRow('Nature of work:', self.nature_of_work)
 
         # Routines carried out
         # service report - contractor's engineer 10 lines
         self.routines = QTextEdit(self)
-        self.form_layout.addRow('Routines Carried Out:', self.routines)
+        self.form_layoutl.addRow('Routines Carried Out:', self.routines)
 
         # Parts Replaced
         self.parts_replaced = QLineEdit(self)
-        self.form_layout.addRow('Parts Replaced:', self.parts_replaced)
+        self.form_layoutl.addRow('Parts Replaced:', self.parts_replaced)
 
         # Spares Supplied By
         self.suppliers = ['Navy' , 'Contractor']
         self.spares = QComboBox(self)
         self.spares.addItems(self.suppliers)
-        self.form_layout.addRow('Spares Supplied By:', self.spares)
+        self.form_layoutl.addRow('Spares Supplied By:', self.spares)
 
         # Invoice Details
         self.invoice = QLineEdit(self)
-        self.form_layout.addRow('Invoice Details:', self.invoice)
+        self.form_layoutl.addRow('Invoice Details:', self.invoice)
 
         # Requirement of OEM
         self.boolean = ['Yes' , 'No']
         self.oem = QComboBox(self)
         self.oem.addItems(self.boolean)
-        self.form_layout.addRow('Requirement of OEM:', self.oem)
+        self.form_layoutl.addRow('Requirement of OEM:', self.oem)
 
         # OEM service report
         self.service = QLineEdit(self)
-        self.form_layout.addRow('OEM Service Report:', self.service)
+        self.form_layoutl.addRow('OEM Service Report:', self.service)
 
         # Defects if any observed
         self.defects = QTextEdit(self)
-        self.form_layout.addRow('Defects If Any Observed:', self.defects)
+        self.form_layoutr.addRow('Defects If Any Observed:', self.defects)
 
         # Corrective action
         self.correction = QTextEdit(self)
-        self.form_layout.addRow('Corrective Actions:', self.correction)
+        self.form_layoutr.addRow('Corrective Actions:', self.correction)
 
         # Customer Remark
         self.remark = QTextEdit(self)
-        self.form_layout.addRow('Customer Remark:', self.remark)
+        self.form_layoutr.addRow('Customer Remark:', self.remark)
 
         # contractor name
         self.contractor_name = QLineEdit(self)
-        self.form_layout.addRow('Contractor Name:', self.contractor_name)
+        self.form_layoutr.addRow('Contractor Name:', self.contractor_name)
         # contractor designation
         self.contractor_desig = QLineEdit(self)
-        self.form_layout.addRow('Contractor Designation:',
+        self.form_layoutr.addRow('Contractor Designation:',
                 self.contractor_desig)
 
         # customer name
         self.customer_name = QLineEdit(self)
-        self.form_layout.addRow('Customer Name:', self.customer_name)
+        self.form_layoutr.addRow('Customer Name:', self.customer_name)
         # customer designation
         self.customer_desig = QLineEdit(self)
-        self.form_layout.addRow('Customer Designation:',
+        self.form_layoutr.addRow('Customer Designation:',
                 self.customer_desig)
 
         # Add the form layout to the main VBox layout
-        self.layout.addLayout(self.form_layout)
+        self.layoutl.addLayout(self.form_layoutl)
+        self.layoutr.addLayout(self.form_layoutr)
+        self.layout.addLayout(self.layoutl)
+        self.layout.addLayout(self.layoutr)
 
         # Add stretch to separate the form layout from the button
         self.layout.addStretch(1)
