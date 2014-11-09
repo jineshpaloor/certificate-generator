@@ -30,6 +30,15 @@ class PDFGenerator(object):
     def make_bold(self, text):
         return Paragraph('<b>' + str(text) + '</b>', self.styles['EmptyStyle'])
 
+    def write_img_header(self):
+        img_header = '''<para><br/>  <img src="LETTER_HEAD.png" width="580" height="120" valign="0"/> <br/></para>'''
+        header = Paragraph(img_header, self.styles['MainHeader'])
+        header_table = Table([[header]], colWidths=(580,), rowHeights=(80,))
+        header_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ]))
+        self.elements.append(header_table)
+
     def write_main_header(self):
         """
         main header section

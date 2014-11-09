@@ -183,8 +183,9 @@ class CertificateGenerator(QWidget):
         result = cur.execute(
             "select * from certificate where wcc='{0}'".format(wcc))
         data = result.fetchone()
-        pdf = PDFGenerator('amc_certificate_{0}.pdf'\
+        pdf = PDFGenerator('pdf/amc_certificate_{0}.pdf'\
             .format(data.get('id')))
+        pdf.write_img_header()
         pdf.write_main_header()
         row_headers = [
             'WCC', 'DATE', 'Nature of work', 'Routines carried out',
