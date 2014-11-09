@@ -197,8 +197,8 @@ class CertificateGenerator(QWidget):
                 data.get('nature_of_work'), data.get('routines'),
                 data.get('parts_replaced'), data.get('spares_supplied_by'),
                 data.get('invoice_details'),  data.get('requirment_oem'),
-                data.get('defects'),  data.get('correction'),
-                data.get('oem_service_report'), data.get('customer_remark')]
+                data.get('oem_service_report'), data.get('defects'),
+                data.get('correction'), data.get('customer_remark')]
 
         names = [data.get('contractor_name'), data.get('customer_name')]
         designations = [data.get('contractor_designation'),
